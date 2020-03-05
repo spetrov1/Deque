@@ -7,7 +7,7 @@
 
 int main()
 {
-    Deque<int> deq = Deque<int>(1);
+    Deque<double> deq = Deque<double>(1);
     deq.addFirst(5);
     deq.print();
     
@@ -25,4 +25,14 @@ int main()
 
     deq.addFirst(-15);
     deq.print();
+
+    Deque<double> deq2;
+    deq2 = deq;
+
+    deq2.print();
+
+    deq2.addLast(15.5);
+    deq2.removeFirst();
+    deq2.addFirst(1.5);
+    deq2.print();
 }

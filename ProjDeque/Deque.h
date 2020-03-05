@@ -20,7 +20,7 @@ public:
 	Deque();
 	Deque(int capacity);
 	Deque(const Deque&);
-	// Deque& operator=(const Deque&);
+	Deque& operator=(const Deque&);
 
 	void addFirst(T elem);
 	T removeFirst();
@@ -67,8 +67,20 @@ Deque<T>::Deque(const Deque& other) {
 	}
 }
 
-
-
+template <class T>
+Deque<T>& Deque<T>::operator=(const Deque<T>& other) {
+	if (this != &other) {
+		this->capacity = other.capacity;
+		this->start = other.start;
+		this->size = other.size;
+		this->array = new T[other.capacity];
+		int tailIndex = getTailIndex();
+		for (int i = start; i <= tailIndex; ++i) {
+			this->array[i] = other.array[i];
+		}
+	}
+	return *this;
+}
 
 template <class T>
 void Deque<T>::resize() {
