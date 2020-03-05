@@ -14,7 +14,7 @@ private:
 	const int resizeNumber = 2;
 	void resize();
 	int getTailIndex();
-
+	void freeDynamicMemory();
 	// void assignArray( TODO );
 public:
 	Deque();
@@ -59,6 +59,7 @@ Deque<T>::Deque(const Deque& other) {
 	this->capacity = other.capacity;
 	this->start = other.start;
 	this->size = other.size;
+	freeDynamicMemory();
 	this->array = new T[capacity];
 	
 	int tailIndex = getTailIndex();
@@ -73,6 +74,8 @@ Deque<T>& Deque<T>::operator=(const Deque<T>& other) {
 		this->capacity = other.capacity;
 		this->start = other.start;
 		this->size = other.size;
+		freeDynamicMemory();
+
 		this->array = new T[other.capacity];
 		int tailIndex = getTailIndex();
 		for (int i = start; i <= tailIndex; ++i) {
@@ -216,4 +219,9 @@ void Deque<T>::print() {
 	}
 	cout << " -- some meta data --> start = " << start << " size = " 
 		<< size << " capacity = " << capacity << endl;
+}
+
+template <class T>
+void Deque<T>::freeDynamicMemory() {
+	delete[]this->array;
 }

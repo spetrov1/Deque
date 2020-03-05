@@ -7,6 +7,8 @@
 
 int main()
 {
+    // Some manual tests
+
     Deque<double> deq = Deque<double>(1);
     deq.addFirst(5);
     deq.print();
