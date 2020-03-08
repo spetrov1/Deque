@@ -2,14 +2,19 @@
 //
 
 #include <iostream>
-#include "Deque.h"
 
+#include "Deque.h"
+#include "Deque.h" // just to test
+
+
+using deque::Deque; // if we only want to use Deque class from namespace deque
+using namespace deque; // if we want to use the whole namespace deque
 
 int main()
 {
     // Some manual tests
 
-    Deque<double> deq = Deque<double>(1);
+    Deque deq(1); // deque::Deque deq(1); -- if not typed using namespace deque or ..
     deq.addFirst(5);
     deq.print();
     
@@ -28,7 +33,7 @@ int main()
     deq.addFirst(-15);
     deq.print();
 
-    Deque<double> deq2;
+    Deque deq2;
     deq2 = deq;
 
     deq2.print();

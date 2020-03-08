@@ -18,6 +18,9 @@
     <ClCompile Include="ProjDeque.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Deque.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Deque.h">

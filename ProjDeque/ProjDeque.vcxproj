@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Deque.cpp" />
     <ClCompile Include="ProjDeque.cpp" />
   </ItemGroup>
   <ItemGroup>
