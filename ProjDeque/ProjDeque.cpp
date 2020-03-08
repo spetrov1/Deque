@@ -1,11 +1,8 @@
 // ProjDeque.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
-#include <iostream>
 
-#include "Deque.h"
-#include "Deque.h" // just to test
-
+#include "pch.h"
 
 using deque::Deque; // if we only want to use Deque class from namespace deque
 using namespace deque; // if we want to use the whole namespace deque
@@ -42,4 +39,5 @@ int main()
     deq2.removeFirst();
     deq2.addFirst(1.5);
     deq2.print();
+
 }

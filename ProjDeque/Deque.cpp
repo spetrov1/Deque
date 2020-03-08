@@ -1,5 +1,4 @@
 #include "Deque.h"
-
  
 deque::Deque::Deque() {
 	capacity = 3;
@@ -7,7 +6,6 @@ deque::Deque::Deque() {
 	size = 0;
 	array = new double[capacity];
 }
-
  
 deque::Deque ::Deque(int capacity) {
 	if (capacity < 1) {
@@ -20,7 +18,6 @@ deque::Deque ::Deque(int capacity) {
 	this->size = 0;
 	this->array = new double[this->capacity];
 }
-
  
 deque::Deque::Deque(const Deque& other) {
 	this->capacity = other.capacity;
@@ -34,7 +31,6 @@ deque::Deque::Deque(const Deque& other) {
 		array[i] = other.array[i];
 	}
 }
-
  
 deque::Deque& deque::Deque::operator=(const Deque & other) {
 	if (this != &other) {
@@ -52,7 +48,6 @@ deque::Deque& deque::Deque::operator=(const Deque & other) {
 	return *this;
 }
 
- 
 void deque::Deque::resize() {
 	int newCapacity = resizeNumber * size;
 	int offset = size / 2;
@@ -68,7 +63,6 @@ void deque::Deque::resize() {
 	this->start = newStart;
 	this->capacity = newCapacity;
 }
-
  
 void deque::Deque::addFirst(double newElem) {
 	if (start == 0) {
@@ -83,7 +77,6 @@ void deque::Deque::addFirst(double newElem) {
 	array[start] = newElem;
 	++size;
 }
-
  
 double deque::Deque ::removeFirst() {
 	double removedElement;
@@ -103,7 +96,6 @@ double deque::Deque ::removeFirst() {
 
 	return removedElement;
 }
-
  
 double deque::Deque::getFirst() {
 	if (size == 0) {
@@ -112,8 +104,6 @@ double deque::Deque::getFirst() {
 	}
 	return array[start];
 }
-
-
  
 void deque::Deque::addLast(double newElem) {
 	int tailIndex = getTailIndex();
@@ -135,8 +125,6 @@ void deque::Deque::addLast(double newElem) {
 
 	++size;
 }
-
-
  
 double deque::Deque ::removeLast() {
 	double removedElement;
@@ -154,7 +142,6 @@ double deque::Deque ::removeLast() {
 
 	return removedElement;
 }
-
  
 double deque::Deque::getLast() {
 	int tailIndex = getTailIndex();
@@ -164,8 +151,6 @@ double deque::Deque::getLast() {
 	}
 	return array[tailIndex];
 }
-
-
  
 int deque::Deque ::getTailIndex() {
 	if (size == 0) {
@@ -173,8 +158,6 @@ int deque::Deque ::getTailIndex() {
 	}
 	return start + size - 1;
 }
-
-
  
 void deque::Deque::print() {
 	if (size == 0) {
@@ -188,7 +171,6 @@ void deque::Deque::print() {
 	cout << " -- some meta data --> start = " << start << " size = "
 		<< size << " capacity = " << capacity << endl;
 }
-
  
 void deque::Deque::freeDynamicMemory() {
 	delete[]this->array;
