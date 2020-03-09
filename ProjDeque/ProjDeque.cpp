@@ -12,6 +12,7 @@ int main()
     using std::endl;
 
     Deque<int> d(1);
+
     d.addFirst(5);
     d.print();
 
@@ -47,9 +48,10 @@ int main()
 
     deq2.addLast(15.5);
     deq2.removeFirst();
-    deq2.addFirst(1.5);
+    deq2.addLast(1);
+    
     deq2.print();
-
+   
     cout << "Hello world! " << endl;
 
     
