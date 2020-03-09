@@ -19,7 +19,7 @@ private:
 	
 	const short resizeCoeff = 2;
 	void resize();
-	size_t getTailIndex(); // return size_t maybe ?
+	size_t getTailIndex() const; // return size_t maybe ?
 	void freeDynamicMemory();
 	void copyFrom(const Deque& other);
 	static T* createBuffer(size_t size, size_t initFrom, size_t initTo, const T* initValues);
@@ -47,6 +47,9 @@ public:
 
 
 // Why inline ??
+/// Help function for copy constructor
+/// 
+/// Help function for operator=
 template<class T>
 inline void Deque<T>::copyFrom(const Deque& other)
 {
@@ -66,6 +69,10 @@ inline void Deque<T>::copyFrom(const Deque& other)
 }
 
 // static for the class or just for the file ?
+/// Return new buffer
+///
+/// Initialized with segment of values (initFrom ... initTo) from initValues
+/// Return nullptr if problem assigning values
 template <typename T>
 T* Deque<T>::createBuffer(size_t size, size_t initFrom, size_t initTo, const T* initValues)
 {
@@ -87,6 +94,10 @@ T* Deque<T>::createBuffer(size_t size, size_t initFrom, size_t initTo, const T* 
 	return newBuffer;
 }
 
+/// If not given parameter, deque is set to EmptyState
+///
+/// If capacity < 1, deque is set to EmptyState
+/// ELSE just allocates capacity size for the deque
 template <class T>
 Deque<T>::Deque(int capacity)
 	: capacity(capacity)
@@ -97,7 +108,7 @@ Deque<T>::Deque(int capacity)
 	}
 
 	try {
-		buffer = new T[this->capacity];
+		buffer = new T[capacity];
 	}
 	catch (...) { // Or Overflow_Error, BadAlloc ... which one ??
 		setToEmptyState();
@@ -124,14 +135,20 @@ Deque<T>::~Deque() {
 	freeDynamicMemory();
 }
 
+
+/// Allocate memory for bigger buffer
+///
+/// Assigning the 'old' values to the 'new' allocated buffer
 template <class T>
 void Deque<T>::resize()
 {
-	// int newCapacity = size ? resizeNumber * size : 2;
-	size_t newCapacity = size * resizeCoeff; // size > 0 always
+	assert(size); // size is expected to be greater than 0
+
+	size_t newCapacity = size * resizeCoeff; // size > 0 always when resize is invoked
 	size_t offset = size / 2;
 	size_t newStart = offset;
 
+	// Should be checked if createBuffer returned nullptr ???
 	T* newBuffer = createBuffer(
 		newCapacity,
 		(newCapacity - capacity) / 2, // == (size / 2) ??
@@ -146,9 +163,14 @@ void Deque<T>::resize()
 	buffer = newBuffer;
 }
 
+/// If empty deque, allocate some memory for buffer and ... add first element in deque
+/// If start(head of deque) is 0 indexed, ... resize deque and add the new head of deque
+/// ELSE just add new head of deque
 template <class T>
 void Deque<T>::addFirst(T newElem) {
-	if (isEmpty()) {
+
+	// TODO check if empty deque (size == 0)
+	if (isEmpty()) { // this case only if deque is in empty state
 		allocateSomeBufferMemory();
 		start = capacity / 2;
 	}
@@ -162,19 +184,21 @@ void Deque<T>::addFirst(T newElem) {
 	++size;
 }
 
+/// If empty deque ... NULL is returned
+/// Removes head of deque
+/// Return head of deque
 template <class T>
 T Deque<T>::removeFirst() {
 	T removedElement;
-	if (size == 0) {
-		cout << "There is nothing to remove ...";
+	if (isEmpty()) {
+		cout << "There is nothing to remove ..."; // Is this message okay ???
 		return NULL;
 	}
 
 	removedElement = buffer[start];
 	--size;
 	if (size == 0) {
-		start = -1;
-		// TODO set to empty state
+		setToEmptyState();
 	}
 	else {
 		start += 1;
@@ -194,20 +218,22 @@ T Deque<T>::getFirst() const {
 	return buffer[start];
 }
 
-
+/// If empty deque, allocate some memory for buffer and ... add first element in deque
+/// If no more space for tail, ... resize deque and add the new elem to the tail of deque
+/// ELSE just add new elem to the tail of deque
 template <class T>
 void Deque<T>::addLast(T newElem) {
 	size_t tailIndex = getTailIndex();
 	size_t newTailIndex;
 
-	// TODO check if empty state
-	if (tailIndex == capacity - 1) { // no more tail
-		resize();					  // then extend it
-		newTailIndex = getTailIndex();
-	}
-	else if (tailIndex == -1) { // empty deque
+	if (isEmpty()) {
+		allocateSomeBufferMemory();
 		start = capacity / 2;
 		newTailIndex = start - 1;
+	}
+	else if (tailIndex == capacity - 1) { // no more tail
+		resize();						  // then extend it
+		newTailIndex = getTailIndex();
 	}
 	else {
 		newTailIndex = tailIndex;
@@ -218,7 +244,9 @@ void Deque<T>::addLast(T newElem) {
 	++size;
 }
 
-
+/// If empty deque, ... NULL returned
+/// Removes last element(TAIL) of deque
+/// Return last element(TAIL) of deque
 template <class T>
 T Deque<T>::removeLast() {
 	T removedElement;
@@ -231,8 +259,7 @@ T Deque<T>::removeLast() {
 	--size;
 
 	if (size == 0) {
-		start = -1;
-		// TODO set to empty state
+		setToEmptyState();
 	}
 
 	return removedElement;
@@ -250,9 +277,9 @@ T Deque<T>::getLast() const {
 
 
 template <class T>
-size_t Deque<T>::getTailIndex() {
+size_t Deque<T>::getTailIndex() const {
 	if (size == 0) {
-		return -1;
+		return -1; // TODO size_t can't be negative
 	}
 	return start + size - 1;
 }

@@ -8,6 +8,13 @@
 
 int main()
 {
+
+    Deque<int> d(1);
+    d.addLast(5);
+    d.print();
+    /// Capacity is 4, it has to be 1 ???
+
+    /*
     // Some manual tests
 
     Deque<double> deq = Deque<double>(1);
@@ -40,4 +47,7 @@ int main()
     deq2.print();
 
     cout << "Hello world! " << endl;
+
+    */
+
 }
