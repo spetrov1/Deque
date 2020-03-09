@@ -17,7 +17,7 @@ int main()
     deq.addLast(15);
     deq.print();
 
-    int el;
+    double el;
     while( (el = deq.removeLast()) ) {
         cout << el << " ";
     }
@@ -38,4 +38,6 @@ int main()
     deq2.removeFirst();
     deq2.addFirst(1.5);
     deq2.print();
+
+    cout << "Hello world! " << endl;
 }
