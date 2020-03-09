@@ -8,15 +8,17 @@
 
 int main()
 {
+    using std::cout;
+    using std::endl;
 
     Deque<int> d(1);
-    d.addLast(5);
+    d.addFirst(5);
     d.print();
 
 
     /// Capacity is 4, it has to be 1 ???
 
-    /*
+    
     // Some manual tests
 
     Deque<double> deq = Deque<double>(1);
@@ -50,6 +52,6 @@ int main()
 
     cout << "Hello world! " << endl;
 
-    */
+    
 
 }

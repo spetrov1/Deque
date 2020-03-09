@@ -20,6 +20,7 @@ private:
 	void freeDynamicMemory();
 	void copyFrom(const Deque& other);
 	static T* createBuffer(size_t size, size_t initFrom, size_t initTo, const T* initValues);
+	bool dequeInEmptyState() const;
 
 public:
 	Deque(int capacity = -1);
@@ -167,8 +168,12 @@ template <class T>
 void Deque<T>::addFirst(T newElem) {
 
 	// TODO check if empty deque (size == 0)
-	if (isEmpty()) { // this case only if deque is in empty state
+	
+	if (dequeInEmptyState()) { // When in empty state
 		allocateSomeBufferMemory();
+		start = capacity / 2;
+	}
+	else if (isEmpty()) {
 		start = capacity / 2;
 	}
 	else if (start == 0) {
@@ -223,8 +228,12 @@ void Deque<T>::addLast(T newElem) {
 	size_t tailIndex = getTailIndex();
 	size_t newTailIndex;
 
-	if (isEmpty()) {
+	if (dequeInEmptyState()) {
 		allocateSomeBufferMemory();
+		start = capacity / 2;
+		newTailIndex = start - 1;
+	}
+	else if (isEmpty()) {
 		start = capacity / 2;
 		newTailIndex = start - 1;
 	}
@@ -319,4 +328,9 @@ void Deque<T>::setToEmptyState() {
 	size = 0;
 	start = 0;
 	buffer = nullptr;
+}
+
+template <class T>
+bool Deque<T>::dequeInEmptyState() const {
+	return isEmpty() && capacity == 0;
 }
