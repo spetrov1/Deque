@@ -1,7 +1,0 @@
-﻿  ProjDeque.cpp
-C:\Users\35988\Desktop\University\3rdCourse\6thSemester\CompanyEducation\Projects\ProjDeque\ProjDeque\ProjDeque.cpp(18,32): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
-          with
-          [
-              T=double
-          ]
-  ProjDeque.vcxproj -> C:\Users\35988\Desktop\University\3rdCourse\6thSemester\CompanyEducation\Projects\ProjDeque\Debug\ProjDeque.exe
