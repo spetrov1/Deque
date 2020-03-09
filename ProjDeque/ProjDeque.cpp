@@ -12,6 +12,8 @@ int main()
     Deque<int> d(1);
     d.addLast(5);
     d.print();
+
+
     /// Capacity is 4, it has to be 1 ???
 
     /*

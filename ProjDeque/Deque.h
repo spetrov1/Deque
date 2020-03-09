@@ -1,11 +1,8 @@
 #pragma once
 
-#include <iostream> //TODO Does not make sense here
 #include <cassert>
 
 // TODO documentation ---> comments to almost every method
-
-using namespace std; //TODO considered a bad practice in header files
 
 template <class T>
 class Deque
@@ -191,7 +188,7 @@ template <class T>
 T Deque<T>::removeFirst() {
 	T removedElement;
 	if (isEmpty()) {
-		cout << "There is nothing to remove ..."; // Is this message okay ???
+		std::cout << "There is nothing to remove ..."; // Is this message okay ???
 		return NULL;
 	}
 
@@ -212,7 +209,7 @@ T Deque<T>::removeFirst() {
 template <class T>
 T Deque<T>::getFirst() const {
 	if (isEmpty()) {
-		cout << "Unsuccessfull try to get first element of deque... Empty deque!" << endl;
+		std::cout << "Unsuccessfull try to get first element of deque... Empty deque!" << std::endl;
 		return NULL;
 	}
 	return buffer[start];
@@ -252,7 +249,7 @@ T Deque<T>::removeLast() {
 	T removedElement;
 	size_t tailIndex = getTailIndex();
 	if (size == 0) {
-		cout << "There is nothing to remove ..." << endl;
+		std::cout << "There is nothing to remove ..." << std::endl;
 		return NULL;
 	}
 	removedElement = buffer[tailIndex];
@@ -269,7 +266,7 @@ template <class T>
 T Deque<T>::getLast() const {
 	int tailIndex = getTailIndex();
 	if (size == 0) {
-		cout << "Unsuccessfull try to get last element of deque... Empty deque!" << endl;
+		std::cout << "Unsuccessfull try to get last element of deque... Empty deque!" << std::endl;
 		return NULL;
 	}
 	return buffer[tailIndex];
@@ -288,15 +285,15 @@ size_t Deque<T>::getTailIndex() const {
 template <class T>
 void Deque<T>::print() {
 	if (size == 0) {
-		cout << "Empty deque..." << endl;
+		std::cout << "Empty deque..." << std::endl;
 		return;
 	}
 	size_t tailIndex = getTailIndex();
 	for (size_t index = start; index <= tailIndex; ++index) {
-		cout << buffer[index] << " ";
+		std::cout << buffer[index] << " ";
 	}
-	cout << " -- some meta data --> start = " << start << " size = " 
-		<< size << " capacity = " << capacity << endl;
+	std::cout << " -- some meta data --> start = " << start << " size = " 
+		<< size << " capacity = " << capacity << std::endl;
 }
 
 template <class T>
