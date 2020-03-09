@@ -1,24 +1,31 @@
 #pragma once
-#include <iostream>
-using namespace std;
+
+#include <iostream> //TODO Does not make sense here
+#include <cassert>
+
+using namespace std; //TODO considered a bad practice in header files
 
 template <class T>
 class Deque
 {
 private:
-	int capacity;
-	int start;
-	int size;
-	T* array;
+	int capacity = 3; //TODO move from int -> size_t
+	int start = -1;
+	int size = 0;
+	T* buffer = nullptr;
 
 	const int resizeNumber = 2;
 	void resize();
 	int getTailIndex();
 	void freeDynamicMemory();
 	// void assignArray( TODO );
+
+	void copyFrom(const Deque& other);
+	static T* clone(const T* buffer, size_t size, size_t from, size_t to);
+
 public:
 	Deque();
-	Deque(int capacity);
+	Deque(int capacity = 3);
 	Deque(const Deque&);
 	Deque& operator=(const Deque&);
 
@@ -33,73 +40,94 @@ public:
 	void print(); // just to test
 };
 
-template <class T>
-Deque<T>::Deque() {
-	capacity = 3;
-	start = -1;
-	size = 0;
-	array = new T[capacity];
+template<class T>
+inline void Deque<T>::copyFrom(const Deque& other)
+{
+	T* newBuffer = createBuffer(
+		other.capacity,
+		other.start,
+		other.start + other.size,
+		other.buffer + other.start,
+	);
+
+	capacity = other.capacity;
+	start = other.start;
+	size = other.size;
+
+	delete[] buffer;
+	buffer = newBuffer;
+}
+
+template <typename T>
+static T* createBuffer(size_t size, size_t initFrom, size_t initTo, const T* initValues)
+{
+	assert(initValues);
+	assert(size > 0);
+
+	T* newBuffer = new T[size];
+
+	try {
+		for (size_t i = initFrom; i < initTo; ++i, ++initValues)
+			newBuffer[i] = *initValues;
+	}
+	catch (...) {
+		delete[] newBuffer;
+		return;
+	}
+
+	return newBuffer;
 }
 
 template <class T>
-Deque<T>::Deque(int capacity) {
+Deque<T>::Deque() {
+	buffer = new T[capacity]; //may throw!!!
+}
+
+template <class T>
+Deque<T>::Deque(int capacity)
+	: capacity(capacity)
+{
 	if (capacity < 1) {
 		this->capacity = 3;
 	}
-	else {
-		this->capacity = capacity;
-	}
-	this->start = -1;
-	this->size = 0;
-	this->array = new T[this->capacity];
+
+	this->buffer = new T[this->capacity];
 }
 
 template <class T>
-Deque<T>::Deque(const Deque& other) {
-	this->capacity = other.capacity;
-	this->start = other.start;
-	this->size = other.size;
-	freeDynamicMemory();
-	this->array = new T[capacity];
-	
-	int tailIndex = getTailIndex();
-	for (int i = start; i <= tailIndex; ++i) {
-		array[i] = other.array[i];
-	}
+Deque<T>::Deque(const Deque& other)
+{
+	copyFrom(other);
 }
 
 template <class T>
-Deque<T>& Deque<T>::operator=(const Deque<T>& other) {
+Deque<T>& Deque<T>::operator=(const Deque<T>& other)
+{
 	if (this != &other) {
-		this->capacity = other.capacity;
-		this->start = other.start;
-		this->size = other.size;
-		freeDynamicMemory();
-
-		this->array = new T[other.capacity];
-		int tailIndex = getTailIndex();
-		for (int i = start; i <= tailIndex; ++i) {
-			this->array[i] = other.array[i];
-		}
+		copyFrom(other);
 	}
 	return *this;
 }
 
 template <class T>
-void Deque<T>::resize() {
-	int newCapacity = resizeNumber * size;
+void Deque<T>::resize()
+{
+	int newCapacity = size ? resizeNumber * size : 2;
 	int offset = size / 2;
 	int newStart = offset;
 
-	T* temp = array;
-	// Try to isolate the assigning in other function
-	array = new T[newCapacity];
-	for (int i = 0; i < size; ++i) {
-		array[newStart + i] = temp[start + i];
-	}
-
+	T* newBuffer = createBuffer(
+		newCapacity,
+		(newCapacity - capacity) / 2,
+		start + size,
+		buffer + start,
+	);
+	
 	this->start = newStart;
 	this->capacity = newCapacity;
+
+	delete[]buffer;
+	buffer = newBuffer;
 }
 
 template <class T>
@@ -112,7 +140,7 @@ void Deque<T>::addFirst(T newElem) {
 	} else {
 		start = start - 1;
 	}
-	array[start] = newElem;
+	buffer[start] = newElem;
 	++size;
 }
 
@@ -124,7 +152,7 @@ T Deque<T>::removeFirst() {
 		return NULL;
 	}
 
-	removedElement = array[start];
+	removedElement = buffer[start];
 	--size;
 	if (size == 0) {
 		start = -1;
@@ -136,13 +164,15 @@ T Deque<T>::removeFirst() {
 	return removedElement;
 }
 
+//TODO Handle the case when the container is empty
+//TODO Pick a proper error-handling method
 template <class T>
 T Deque<T>::getFirst() {
 	if (size == 0) {
 		cout << "Unsuccessfull try to get first element of deque... Empty deque!" << endl;
 		return NULL;
 	}
-	return array[start];
+	return buffer[start];
 }
 
 
@@ -163,7 +193,7 @@ void Deque<T>::addLast(T newElem) {
 		newTailIndex = tailIndex;
 	}
 	++newTailIndex;
-	array[newTailIndex] = newElem;
+	buffer[newTailIndex] = newElem;
 
 	++size;
 }
@@ -177,7 +207,7 @@ T Deque<T>::removeLast() {
 		cout << "There is nothing to remove ..." << endl;
 		return NULL;
 	}
-	removedElement = array[tailIndex];
+	removedElement = buffer[tailIndex];
 	--size;
 
 	if (size == 0) {
@@ -194,7 +224,7 @@ T Deque<T>::getLast() {
 		cout << "Unsuccessfull try to get last element of deque... Empty deque!" << endl;
 		return NULL;
 	}
-	return array[tailIndex];
+	return buffer[tailIndex];
 }
 
 
@@ -215,7 +245,7 @@ void Deque<T>::print() {
 	}
 	int tailIndex = getTailIndex();
 	for (int index = start; index <= tailIndex; ++index) {
-		cout << array[index] << " ";
+		cout << buffer[index] << " ";
 	}
 	cout << " -- some meta data --> start = " << start << " size = " 
 		<< size << " capacity = " << capacity << endl;
@@ -223,5 +253,5 @@ void Deque<T>::print() {
 
 template <class T>
 void Deque<T>::freeDynamicMemory() {
-	delete[]this->array;
+	delete[]this->buffer;
 }
