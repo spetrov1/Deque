@@ -1,76 +1,120 @@
 #pragma once
 
-#include <cassert>
-
-// TODO documentation ---> comments to almost every method
+using namespace std;
 
 template <class T>
 class Deque
 {
 private:
-	size_t capacity = 3; //TODO move from int -> size_t
-	size_t start = 0;
-	size_t size = 0;
-	T* buffer = nullptr;
-	
-	
-	const short resizeCoeff = 2;
-	void resize();
-	size_t getTailIndex() const; // return size_t maybe ?
-	void freeDynamicMemory();
-	void copyFrom(const Deque& other);
-	static T* createBuffer(size_t size, size_t initFrom, size_t initTo, const T* initValues);
-	bool dequeInEmptyState() const;
+	int capacity;
+	int start;
+	int size;
+	T* array;
 
+	const int resizeNumber = 2;
+	void resize();
+	int getTailIndex();
+	void freeDynamicMemory();
+	
 public:
-	Deque(int capacity = -1);
+	Deque();
+	Deque(int capacity);
 	Deque(const Deque&);
 	Deque& operator=(const Deque&);
-	~Deque();
-	bool isEmpty() const;
 
 	void addFirst(T elem);
 	T removeFirst();
-	T getFirst() const;
+	T getFirst();
 
 	void addLast(T elem);
 	T removeLast();
-	T getLast() const;
+	T getLast();
 
 	void print(); // just to test
 
-	void setToEmptyState();
-	void allocateSomeBufferMemory(); // It can throw exception ??
+	T* createBuffer(size_t size, size_t initFrom, size_t initTo, const T* initValues);
 };
 
-
-// Why inline ??
-/// Help function for copy constructor
-/// 
-/// Help function for operator=
-template<class T>
-inline void Deque<T>::copyFrom(const Deque& other)
-{
-	T* newBuffer = createBuffer( // can return nullptr, what then ??
-		other.capacity,
-		other.start,
-		other.start + other.size,
-		other.buffer + other.start
-	);
-
-	capacity = other.capacity;
-	start = other.start;
-	size = other.size;
-
-	delete[] buffer;
-	buffer = newBuffer;
+template <class T>
+Deque<T>::Deque() {
+	capacity = 3;
+	start = -1;
+	size = 0;
+	array = new T[capacity];
 }
 
-// static for the class or just for the file ?
-/// Return new buffer
-///
-/// Initialized with segment of values (initFrom ... initTo) from initValues
-/// Return nullptr if problem assigning values
+template <class T>
+Deque<T>::Deque(int capacity) {
+	if (capacity < 1) {
+		this->capacity = 3;
+	}
+	else {
+		this->capacity = capacity;
+	}
+	this->start = -1;
+	this->size = 0;
+	this->array = new T[this->capacity];
+}
+
+template <class T>
+Deque<T>::Deque(const Deque& other) {
+	this->capacity = other.capacity;
+	this->start = other.start;
+	this->size = other.size;
+	freeDynamicMemory();
+	this->array = new T[capacity];
+	
+	int tailIndex = getTailIndex();
+	for (int i = start; i <= tailIndex; ++i) {
+		array[i] = other.array[i];
+	}
+}
+
+template <class T>
+Deque<T>& Deque<T>::operator=(const Deque<T>& other) {
+	if (this != &other) {
+		this->capacity = other.capacity;
+		this->start = other.start;
+		this->size = other.size;
+		freeDynamicMemory();
+
+		this->array = new T[other.capacity];
+		int tailIndex = getTailIndex();
+		for (int i = start; i <= tailIndex; ++i) {
+			this->array[i] = other.array[i];
+		}
+	}
+	return *this;
+}
+
+template <class T>
+void Deque<T>::resize() {
+	int newCapacity,
+		offset,
+		newStart;
+	if (size == 1) {
+		int minCapacityAfterResize = 3;
+		newCapacity = minCapacityAfterResize;
+		offset = 1;
+	}
+	else {
+		newCapacity = resizeNumber * size;
+		offset = size / 2;
+	}
+	
+	newStart = offset;
+	
+	array = createBuffer(
+		newCapacity,
+		newStart,
+		newStart + size,
+		array + start
+	);
+
+	this->start = newStart;
+	this->capacity = newCapacity;
+}
+
 template <typename T>
 T* Deque<T>::createBuffer(size_t size, size_t initFrom, size_t initTo, const T* initValues)
 {
@@ -78,11 +122,13 @@ T* Deque<T>::createBuffer(size_t size, size_t initFrom, size_t initTo, const T* 
 	assert(size > 0);
 
 	T* newBuffer = new T[size]; // throw exception ???
-
+	
 	try {
-		for (size_t i = initFrom; i < initTo; ++i, ++initValues)
+		for (size_t i = initFrom; i < initTo; ++i, ++initValues) {
 			newBuffer[i] = *initValues;
+		}
 	}
+
 	catch (...) {
 		delete[] newBuffer;
 
@@ -92,115 +138,33 @@ T* Deque<T>::createBuffer(size_t size, size_t initFrom, size_t initTo, const T* 
 	return newBuffer;
 }
 
-/// If not given parameter, deque is set to EmptyState
-///
-/// If capacity < 1, deque is set to EmptyState
-/// ELSE just allocates capacity size for the deque
-template <class T>
-Deque<T>::Deque(int capacity)
-	: capacity(capacity)
-{
-	if (capacity < 1) {
-		setToEmptyState();
-		return;
-	}
 
-	try {
-		buffer = new T[capacity];
-	}
-	catch (...) { // Or Overflow_Error, BadAlloc ... which one ??
-		setToEmptyState();
-	}
-}
-
-template <class T>
-Deque<T>::Deque(const Deque& other)
-{
-	copyFrom(other);
-}
-
-template <class T>
-Deque<T>& Deque<T>::operator=(const Deque<T>& other)
-{
-	if (this != &other) {
-		copyFrom(other);
-	}
-	return *this;
-}
-
-template <class T>
-Deque<T>::~Deque() {
-	freeDynamicMemory();
-}
-
-
-/// Allocate memory for bigger buffer
-///
-/// Assigning the 'old' values to the 'new' allocated buffer
-template <class T>
-void Deque<T>::resize()
-{
-	assert(size); // size is expected to be greater than 0
-
-	size_t newCapacity = size * resizeCoeff; // size > 0 always when resize is invoked
-	size_t offset = size / 2;
-	size_t newStart = offset;
-
-	// Should be checked if createBuffer returned nullptr ???
-	T* newBuffer = createBuffer(
-		newCapacity,
-		(newCapacity - capacity) / 2, // == (size / 2) ??
-		start + size,
-		buffer + start
-	);
-	
-	start = newStart;
-	capacity = newCapacity;
-
-	delete[] buffer;
-	buffer = newBuffer;
-}
-
-/// If empty deque, allocate some memory for buffer and ... add first element in deque
-/// If start(head of deque) is 0 indexed, ... resize deque and add the new head of deque
-/// ELSE just add new head of deque
 template <class T>
 void Deque<T>::addFirst(T newElem) {
-	
-	assert(newElem); // newElem != NULL --- Is it okay ?
-
-	if (dequeInEmptyState()) { // When in empty state
-		allocateSomeBufferMemory();
-		start = capacity / 2;
+	if (start == 0) {
+		this->resize(); // start is modified
 	}
-	else if (isEmpty()) {
-		start = capacity / 2;
-	}
-	else if (start == 0) {
-		resize(); // start is modified
-	}
-	else {
+	if (start == -1) { // or size == 0
+		start = this->capacity / 2;
+	} else {
 		start = start - 1;
 	}
-	buffer[start] = newElem;
+	array[start] = newElem;
 	++size;
 }
 
-/// If empty deque ... NULL is returned
-/// Removes head of deque
-/// Return head of deque
 template <class T>
 T Deque<T>::removeFirst() {
 	T removedElement;
-	if (isEmpty()) {
-		std::cout << "There is nothing to remove ..."; // Is this message okay ???
+	if (size == 0) {
+		cout << "There is nothing to remove ...";
 		return NULL;
 	}
 
-	removedElement = buffer[start];
+	removedElement = array[start];
 	--size;
 	if (size == 0) {
-		setToEmptyState();
+		start = -1;
 	}
 	else {
 		start += 1;
@@ -209,85 +173,72 @@ T Deque<T>::removeFirst() {
 	return removedElement;
 }
 
-//TODO Handle the case when the container is empty
-//TODO Pick a proper error-handling method
 template <class T>
-T Deque<T>::getFirst() const {
-	assert(size); // deque expected to be non-empty.  Is it okay or throw exception better ???
-				  // Why not to return NULL result ???
-
-	return buffer[start];
+T Deque<T>::getFirst() {
+	if (size == 0) {
+		cout << "Unsuccessfull try to get first element of deque... Empty deque!" << endl;
+		return NULL;
+	}
+	return array[start];
 }
 
-/// If empty deque, allocate some memory for buffer and ... add first element in deque
-/// If no more space for tail, ... resize deque and add the new elem to the tail of deque
-/// ELSE just add new elem to the tail of deque
+
 template <class T>
 void Deque<T>::addLast(T newElem) {
+	int tailIndex = getTailIndex();
+	int newTailIndex;
 
-	assert(newElem);
-
-	size_t tailIndex = getTailIndex();
-	size_t newTailIndex;
-
-	if (dequeInEmptyState()) {
-		allocateSomeBufferMemory();
-		start = capacity / 2;
-		newTailIndex = start - 1;
-	}
-	else if (isEmpty()) {
-		start = capacity / 2;
-		newTailIndex = start - 1;
-	}
-	else if (tailIndex == capacity - 1) { // no more tail
-		resize();						  // then extend it
+	if (tailIndex == capacity - 1) { // no more tail
+		resize();					  // then extend it
 		newTailIndex = getTailIndex();
+	}
+	else if (tailIndex == -1) { // empty deque
+		start = capacity / 2;
+		newTailIndex = start - 1;
 	}
 	else {
 		newTailIndex = tailIndex;
 	}
 	++newTailIndex;
-	buffer[newTailIndex] = newElem;
+	array[newTailIndex] = newElem;
 
 	++size;
 }
 
-/// If empty deque, ... NULL returned
-/// Removes last element(TAIL) of deque
-/// Return last element(TAIL) of deque
+
 template <class T>
 T Deque<T>::removeLast() {
 	T removedElement;
-	size_t tailIndex = getTailIndex();
+	int tailIndex = getTailIndex();
 	if (size == 0) {
-		std::cout << "There is nothing to remove ..." << std::endl;
+		cout << "There is nothing to remove ..." << endl;
 		return NULL;
 	}
-	removedElement = buffer[tailIndex];
+	removedElement = array[tailIndex];
 	--size;
 
 	if (size == 0) {
-		setToEmptyState();
+		start = -1;
 	}
 
 	return removedElement;
 }
 
 template <class T>
-T Deque<T>::getLast() const {
+T Deque<T>::getLast() {
 	int tailIndex = getTailIndex();
-	if (isEmpty()) {
-		std::cout << "Unsuccessfull try to get last element of deque... Empty deque!" << std::endl;
+	if (size == 0) {
+		cout << "Unsuccessfull try to get last element of deque... Empty deque!" << endl;
 		return NULL;
 	}
-	return buffer[tailIndex];
+	return array[tailIndex];
 }
 
 
 template <class T>
-size_t Deque<T>::getTailIndex() const {
-	if (isEmpty()) {
-		return -1; // TODO size_t can't be negative
+int Deque<T>::getTailIndex() {
+	if (size == 0) {
+		return -1;
 	}
 	return start + size - 1;
 }
@@ -296,49 +247,18 @@ size_t Deque<T>::getTailIndex() const {
 template <class T>
 void Deque<T>::print() {
 	if (size == 0) {
-		std::cout << "Empty deque..." << std::endl;
+		cout << "Empty deque..." << endl;
 		return;
 	}
-	size_t tailIndex = getTailIndex();
-	for (size_t index = start; index <= tailIndex; ++index) {
-		std::cout << buffer[index] << " ";
+	int tailIndex = getTailIndex();
+	for (int index = start; index <= tailIndex; ++index) {
+		cout << array[index] << " ";
 	}
-	std::cout << " -- some meta data --> start = " << start << " size = " 
-		<< size << " capacity = " << capacity << std::endl;
+	cout << " -- some meta data --> start = " << start << " size = " 
+		<< size << " capacity = " << capacity << endl;
 }
 
 template <class T>
 void Deque<T>::freeDynamicMemory() {
-	delete[] buffer;
-}
-
-/// Size of the deque == 0 (initialized segment of the deque's container) 
-///
-/// Container can still have allocated memory but uninitialized
-template <class T>
-bool Deque<T>::isEmpty() const {
-	return size == 0;
-}
-
-template <class T>
-void Deque<T>::allocateSomeBufferMemory() {
-	short defaultCapacity = 4;
-	buffer = new T[defaultCapacity]; // can throw exception ?
-	capacity = defaultCapacity; // problem assigning short to size_t ???
-}
-
-template <class T>
-void Deque<T>::setToEmptyState() {
-	capacity = 0;
-	size = 0;
-	start = 0;
-	buffer = nullptr;
-}
-
-/// deque still has no allocated memory
-/// then return true
-/// otherwise return false
-template <class T>
-bool Deque<T>::dequeInEmptyState() const {
-	return isEmpty() && capacity == 0;
+	delete[]this->array;
 }
