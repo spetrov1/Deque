@@ -13,10 +13,23 @@ private:
 
 	const short resizeCoeff = 2;
 
+	static std::ofstream logFileStream; // Inited in the main file
+	
 	void resize();
 	void copyFrom(const Deque&);
 	void deleteDynamicMemory();
+
+	// ? Why the following function must be static ?
+	static void redirectClog() {
+		std::clog.rdbuf(logFileStream.rdbuf());
+	}
+	
 public:
+	void* operator new(size_t size);
+	void* operator new[](size_t size);
+	// TODO UnorderedSet
+	// TODO operator delete, delete[], and write to logFile
+
 	Deque(size_t capacity = 0);
 	Deque(const Deque&);
 	Deque& operator=(const Deque&);
@@ -27,7 +40,7 @@ public:
 	void getFirst() const; // TODO, throw exception
 
 	void addLast(T newElem);
-	T removeLast();
+	T removeLast(); // TODO throw exception
 	void getLast(); // TODO throw exception
 
 	void print() const {
@@ -49,6 +62,30 @@ public:
 	void allocateSomeMemory();
 	void turnToNotActiveMode();
 };
+
+template <typename T>
+void* Deque<T>::operator new(size_t size) {
+	// ? Check logFileStream init-ed successfully ?
+	redirectClog();
+
+	void* p = malloc(size);
+
+	std::clog << "Deque operator new... byte(s) allocated: " << size
+		<< " on address " << p << std::endl;
+	
+	return p;
+}
+
+template <typename T>
+void* Deque<T>::operator new[](size_t size) {
+	redirectClog();
+
+	void* p = malloc(size);
+
+	std::clog << "Deque operator new[], byte(s) allocated: " << size
+		<< " on address " << p << std::endl;
+	return p;
+}
 
 template <typename T>
 Deque<T>::~Deque() {
@@ -93,12 +130,13 @@ void Deque<T>::copyFrom(const Deque& other) {
 	this->headIndex = other.headIndex;
 }
 
-/// Capacity == 0 (default) ... unallocated memory for the deque's buffer
+/// Capacity == 0 (default) -> unallocate memory for the deque's buffer
 ///
 /// ELSE allocates memory for the buffer and set appropriate position for head
 template <typename T>
 Deque<T>::Deque(size_t capacity) {
 	if (capacity == 0) 
+		// TODO throw exception maybe ?
 		return;
 	buffer = new T[capacity]; // may throw bad_aloc
 	this->capacity = capacity;
@@ -205,9 +243,9 @@ T Deque<T>::removeLast() {
 /// Saves 'old' elements in the middle of the new buffer
 template <typename T>
 void Deque<T>::resize() {
-	int newCapacity = resizeCoeff * size;
-	int offset = size / 2;
-	int newHeadIndex = offset;
+	size_t newCapacity = resizeCoeff * size;
+	size_t offset = size / 2;
+	size_t newHeadIndex = offset;
 	T* temp = buffer;
 
 	if (size == 1) {
