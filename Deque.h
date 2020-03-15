@@ -19,11 +19,6 @@ private:
 	void resize();
 	void copyFrom(const Deque&);
 	void deleteDynamicMemory();
-
-	// ? Why the following function must be static ?
-	static void redirectClog() {
-		std::clog.rdbuf(logFileStream.rdbuf());
-	}
 	
 public:
 	void* operator new(size_t size);
@@ -37,7 +32,6 @@ public:
 			std::cout << *i << " ";
 		} std::cout << '\n';
 	}
-
 
 	Deque(size_t capacity = 0);
 	Deque(const Deque&);
@@ -91,25 +85,24 @@ void Deque<T>::operator delete[](void* ptr) {
 template <typename T>
 void* Deque<T>::operator new(size_t size) {
 	// ? Check logFileStream init-ed successfully ?
-	// redirectClog(); // TODO problem ?
 
 	void* p = malloc(size);
 	allocatedMemory.insert(p);
 
-	std::clog << "Deque operator new, byte(s) allocated: " << size
-		<< " on address " << p << std::endl;
+	 logFileStream << "Deque operator new, byte(s) allocated: " << size
+	 	<< " on address " << p << std::endl;
 	
 	return p;
 }
 
 template <typename T>
 void* Deque<T>::operator new[](size_t size) {
-	// redirectClog(); // TODO problem ?
+	// Check logFileStream init-ed successfully ?
 
 	void* p = malloc(size);
 	allocatedMemory.insert(p);
 
-	std::clog << "Deque operator new[], byte(s) allocated: " << size
+	logFileStream << "Deque operator new[], byte(s) allocated: " << size
 		<< " on address " << p << std::endl;
 	return p;
 }
