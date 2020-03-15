@@ -5,10 +5,8 @@
 
 #include <iostream>
 #include <cassert>
-
 #include <fstream>
 #include <unordered_set>
-// std::unordered_set<void*> allocatedMemory;
 #include "Deque.h"
 
 
@@ -182,16 +180,6 @@ void f() {
     d2.print();
 }
 
-// #include "Test.h"
-// std::ofstream Test::out = std::ofstream("my_log_file", std::ios::trunc);
-// int Test::i = 15;
-
-/*
-#include "UnorderedSet.h"
-#include <unordered_set>
-std::unordered_set<int> UnorderedSet::set;
-int UnorderedSet::i = 0;
-*/
 
 // ? How we change this PRIVATE variable ?
 // ? Why can not initialize it in private method of Deque?
@@ -200,20 +188,35 @@ std::ofstream Deque<T>::logFileStream = std::ofstream("my_log_file", std::ios::t
 template <typename T>
 std::unordered_set<void*> Deque<T>::allocatedMemory;
 
-// template <typename T>
-// void Deque<T>::redirectClog();
+void* operator new(size_t size) {
+    std::cout << "Global operator new size: " << size << std::endl;
 
+    void* ptr = malloc(size);
+    
+    return ptr;
+}
+void* operator new[](size_t sz) {
+    std::cout << "Global operator new[] size: " << sz << std::endl;
 
-
+    return malloc(sz);
+}
+void operator delete(void* ptr) {
+    std::cout << "Global operator delete\n";
+    free(ptr);
+}
+void operator delete[](void* ptr) {
+    std::cout << "Global operator delete[]\n";
+    free(ptr);
+}
 
 int main()
 {   
-    
+    // double* d = new double;
     Deque<int>* a = new Deque<int>;
     Deque<int>* b = new Deque<int>[2];
-    delete a;
+    // delete a;
     // delete [] b;
 
-    Deque<int>::printAllocatedMemoryAddresses();
+    // Deque<int>::printAllocatedMemoryAddresses();
     
 }
