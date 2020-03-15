@@ -1,6 +1,6 @@
 #pragma once
 
-/// Add documentation
+
 
 template <class T>
 class Deque
@@ -14,6 +14,7 @@ private:
 	const short resizeCoeff = 2;
 
 	static std::ofstream logFileStream; // Inited in the main file
+	static std::unordered_set<void*> allocatedMemory; // Inited in the main file
 	
 	void resize();
 	void copyFrom(const Deque&);
@@ -27,8 +28,16 @@ private:
 public:
 	void* operator new(size_t size);
 	void* operator new[](size_t size);
-	// TODO UnorderedSet
-	// TODO operator delete, delete[], and write to logFile
+	
+	void operator delete(void* ptr);
+	void operator delete[](void* ptr);
+	static void printAllocatedMemoryAddresses() {
+		if (allocatedMemory.size() == 0) return;
+		for (auto i = allocatedMemory.begin(); i != allocatedMemory.end(); ++i) {
+			std::cout << *i << " ";
+		}
+	}
+
 
 	Deque(size_t capacity = 0);
 	Deque(const Deque&);
@@ -64,13 +73,30 @@ public:
 };
 
 template <typename T>
+void Deque<T>::operator delete(void* ptr) {
+	std::clog << "Deque operator delete, " << ptr << " deleted" << std::endl;
+	
+	free(ptr);
+	allocatedMemory.erase(ptr);
+}
+template <typename T>
+void Deque<T>::operator delete[](void* ptr) {
+	std::clog << "Deque operator delete [], " << ptr <<
+		" deleted\n";
+
+	free(ptr);
+	allocatedMemory.erase(ptr);
+}
+
+template <typename T>
 void* Deque<T>::operator new(size_t size) {
 	// ? Check logFileStream init-ed successfully ?
-	redirectClog();
+	// redirectClog(); // TODO problem ?
 
 	void* p = malloc(size);
+	allocatedMemory.insert(p);
 
-	std::clog << "Deque operator new... byte(s) allocated: " << size
+	std::clog << "Deque operator new, byte(s) allocated: " << size
 		<< " on address " << p << std::endl;
 	
 	return p;
@@ -78,9 +104,10 @@ void* Deque<T>::operator new(size_t size) {
 
 template <typename T>
 void* Deque<T>::operator new[](size_t size) {
-	redirectClog();
+	// redirectClog(); // TODO problem ?
 
 	void* p = malloc(size);
+	allocatedMemory.insert(p);
 
 	std::clog << "Deque operator new[], byte(s) allocated: " << size
 		<< " on address " << p << std::endl;
