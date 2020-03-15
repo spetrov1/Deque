@@ -212,7 +212,7 @@ int main()
     Deque<int>* a = new Deque<int>;
     Deque<int>* b = new Deque<int>[2];
     delete a;
-    delete [] b;
+    // delete [] b;
 
     Deque<int>::printAllocatedMemoryAddresses();
     

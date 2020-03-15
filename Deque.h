@@ -32,10 +32,10 @@ public:
 	void operator delete(void* ptr);
 	void operator delete[](void* ptr);
 	static void printAllocatedMemoryAddresses() {
-		if (allocatedMemory.size() == 0) return;
+		std::cout << "Still not deleted memory --> ";
 		for (auto i = allocatedMemory.begin(); i != allocatedMemory.end(); ++i) {
 			std::cout << *i << " ";
-		}
+		} std::cout << '\n';
 	}
 
 
